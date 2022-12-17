@@ -11,13 +11,6 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-type GoogleClaims struct {
-	Email string `json:"email"`
-	Avatar string `json:"picture"`
-	Name string `json:"name"`
-	jwt.StandardClaims
-} 
-
 func getGooglePublicKey(keyID string) (string, error) {
 	resp, err := http.Get("https://www.googleapis.com/oauth2/v1/certs")
 	if err != nil {
@@ -42,7 +35,7 @@ func getGooglePublicKey(keyID string) (string, error) {
 
 
 func validateGoogleJWT(cred string) (GoogleClaims, error) {
-	token, err := jwt.ParseWithClaims(cred, &GoogleClaims{}, func (t *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(cred, &accClaims{}, func (t *jwt.Token) (interface{}, error) {
 		pem, err := getGooglePublicKey(fmt.Sprintf("%s", t.Header["kid"]))
 		if err != nil {
 			return nil, err
@@ -55,20 +48,20 @@ func validateGoogleJWT(cred string) (GoogleClaims, error) {
 	})
 
 	if err != nil {
-		return GoogleClaims{}, err
+		return accClaims{}, err
 	}
 
 	claims, ok := token.Claims.(*GoogleClaims)
 	if !ok {
-		return GoogleClaims{}, err
+		return accClaims{}, err
 	}
 
 	if claims.Audience != GOOGLE_CLIENT_ID {
-		return GoogleClaims{}, errors.New("aud is invalid")
+		return accClaims{}, errors.New("aud is invalid")
 	}
 
 	if claims.ExpiresAt < time.Now().UTC().Unix() {
-		return GoogleClaims{}, err
+		return accClaims{}, err
 	}
 
 	return *claims, nil
