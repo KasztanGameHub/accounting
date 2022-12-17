@@ -1,4 +1,4 @@
-module github.com/KasztanGameHub/accounting
+module github.com/KasztanGameHub/sync
 
 go 1.19
 
