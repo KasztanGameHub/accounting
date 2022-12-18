@@ -34,7 +34,7 @@ func getGooglePublicKey(keyID string) (string, error) {
 }
 
 
-func validateGoogleJWT(cred string) (GoogleClaims, error) {
+func validateGoogleJWT(cred string) (accClaims, error) {
 	token, err := jwt.ParseWithClaims(cred, &accClaims{}, func (t *jwt.Token) (interface{}, error) {
 		pem, err := getGooglePublicKey(fmt.Sprintf("%s", t.Header["kid"]))
 		if err != nil {
@@ -51,7 +51,7 @@ func validateGoogleJWT(cred string) (GoogleClaims, error) {
 		return accClaims{}, err
 	}
 
-	claims, ok := token.Claims.(*GoogleClaims)
+	claims, ok := token.Claims.(*accClaims)
 	if !ok {
 		return accClaims{}, err
 	}
